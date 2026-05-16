@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Library — Biblioteca de Links</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --hue: 0;
+            --rgb: hsl(var(--hue), 100%, 60%);
+            --rgb-glow: hsla(var(--hue), 100%, 60%, 0.4);
+            --rgb-soft: hsla(var(--hue), 100%, 60%, 0.12);
+            --bg: #08080d;
+            --bg-card: rgba(14, 14, 22, 0.75);
+            --bg-card-hover: rgba(20, 20, 32, 0.85);
+            --text: #e8e8ed;
+            --text-dim: #5a5a6e;
+            --text-mid: #8888a0;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --radius: 14px;
+            --radius-sm: 10px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* ===== CANVAS & BG ===== */
+        #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        .rgb-bg {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 700px 500px at 15% 25%, hsla(var(--hue), 70%, 50%, 0.06), transparent),
+                radial-gradient(ellipse 500px 400px at 85% 75%, hsla(calc(var(--hue) + 120), 70%, 50%, 0.05), transparent);
+            transition: background 1s ease;
+        }
+
+        /* ===== CURSOR ===== */
+        .cursor-dot {
+            position: fixed; width: 8px; height: 8px;
+            background: var(--rgb); border-radius: 50%;
+            pointer-events: none; z-index: 100000;
+            mix-blend-mode: difference; transition: transform 0.1s;
+        }
+        .cursor-ring {
+            position: fixed; width: 38px; height: 38px;
+            border: 2px solid var(--rgb); border-radius: 50%;
+            pointer-events: none; z-index: 100000;
+            opacity: 0.5; transition: width 0.3s, height 0.3s, opacity 0.3s;
+        }
+        .cursor-ring.hover { width: 56px; height: 56px; opacity: 0.9; border-color: #fff; }
+        .cursor-dot.click { transform: scale(2.5); }
+
+        /* ===== LAYOUT ===== */
+        .container {
+            position: relative; z-index: 1;
+            max-width: 900px; margin: 0 auto;
+            padding: 48px 24px 120px;
+        }
+
+        /* ===== HEADER ===== */
+        .site-header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-ring {
+            width: 90px; height: 90px; border-radius: 50%;
+            margin: 0 auto 20px; padding: 3px;
+            background: conic-gradient(
+                hsl(var(--hue), 100%, 60%),
+                hsl(calc(var(--hue) + 120), 100%, 60%),
+                hsl(calc(var(--hue) + 240), 100%, 60%),
+                hsl(var(--hue), 100%, 60%)
+            );
+            animation: spin 5s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .logo-ring .logo-inner {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: var(--bg); display: flex;
+            align-items: center; justify-content: center;
+            font-size: 34px; font-weight: 700; color: var(--rgb);
+        }
+
+        .site-header h1 {
+            font-size: 36px; font-weight: 700;
+            background: linear-gradient(135deg, #fff, var(--rgb));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 8px;
+        }
+        .site-header .subtitle {
+            color: var(--text-dim); font-size: 15px; max-width: 500px; margin: 0 auto;
+        }
+
+        /* ===== ADMIN BUTTON ===== */
+        .admin-fab {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 50px; height: 50px; border-radius: 14px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: none; z-index: 50; transition: all 0.3s;
+            color: var(--text-dim); font-size: 20px;
+        }
+        .admin-fab:hover {
+            border-color: var(--rgb); color: var(--rgb);
+            box-shadow: 0 0 20px var(--rgb-glow);
+        }
+
+        /* ===== SEARCH BAR ===== */
+        .search-wrapper {
+            position: relative; margin-bottom: 28px;
+            animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s backwards;
+        }
+        .search-wrapper svg {
+            position: absolute; left: 18px; top: 50%;
+            transform: translateY(-50%); width: 20px; height: 20px;
+            color: var(--text-dim);
+        }
+        .search-input {
+            width: 100%; padding: 16px 20px 16px 52px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 16px; font-size: 15px;
+            font-family: inherit; color: var(--text);
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            outline: none; border-color: var(--rgb);
+            box-shadow: 0 0 0 3px var(--rgb-soft);
+        }
+        .search-input::placeholder { color: var(--text-dim); }
+        .search-count {
+            position: absolute; right: 18px; top: 50%;
+            transform: translateY(-50%); font-size: 13px;
+            color: var(--text-dim); font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ===== CATEGORIES ===== */
+        .categories-bar {
+            display: flex; gap: 10px; flex-wrap: wrap;
+            margin-bottom: 20px;
+            animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.15s backwards;
+        }
+        .cat-btn {
+            padding: 8px 18px; border-radius: 20px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            color: var(--text-mid); font-size: 13px; font-weight: 500;
+            cursor: none; font-family: inherit; transition: all 0.3s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .cat-btn:hover { border-color: var(--border-hover); color: var(--text); }
+        .cat-btn.active {
+            background: var(--rgb-soft); border-color: var(--rgb-glow);
+            color: var(--rgb);
+        }
+        .cat-btn .cat-count {
+            font-size: 11px; background: rgba(255,255,255,0.06);
+            padding: 2px 7px; border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .cat-btn.active .cat-count { background: rgba(255,255,255,0.1); }
+
+        /* ===== TAGS ===== */
+        .tags-bar {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 32px;
+            animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s backwards;
+        }
+        .tag-btn {
+            padding: 5px 14px; border-radius: 8px;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-dim); font-size: 12px; font-weight: 500;
+            cursor: none; font-family: inherit; transition: all 0.3s;
+        }
+        .tag-btn:hover { border-color: var(--border-hover); color: var(--text-mid); }
+        .tag-btn.active {
+            border-color: var(--rgb); color: var(--rgb);
+            background: var(--rgb-soft);
+        }
+
+        /* ===== LINKS GRID ===== */
+        .links-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px; margin-bottom: 40px;
+        }
+
+        .link-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px;
+            cursor: none; transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column; gap: 12px;
+            text-decoration: none; color: inherit;
+        }
+        .link-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, var(--rgb-soft), transparent 60%);
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .link-card:hover::before { opacity: 1; }
+        .link-card:hover {
+            border-color: var(--rgb-glow);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3), 0 0 20px var(--rgb-glow);
+        }
+
+        .link-card .link-top {
+            display: flex; align-items: center; gap: 14px;
+            position: relative; z-index: 1;
+        }
+        .link-card .link-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0; transition: transform 0.3s;
+        }
+        .link-card:hover .link-icon { transform: scale(1.1) rotate(-5deg); }
+        .link-card .link-info { flex: 1; min-width: 0; }
+        .link-card .link-title {
+            font-size: 15px; font-weight: 600; margin-bottom: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .link-card .link-url {
+            font-size: 12px; color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .link-card .link-desc {
+            font-size: 13px; color: var(--text-mid); line-height: 1.5;
+            position: relative; z-index: 1;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .link-card .link-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; z-index: 1; margin-top: auto;
+        }
+        .link-card .link-tags {
+            display: flex; gap: 6px; flex-wrap: wrap;
+        }
+        .link-card .link-tag {
+            font-size: 11px; padding: 3px 10px; border-radius: 6px;
+            background: rgba(255,255,255,0.04); color: var(--text-dim);
+        }
+        .link-card .link-arrow {
+            font-size: 16px; color: var(--text-dim);
+            transition: all 0.3s;
+        }
+        .link-card:hover .link-arrow { color: var(--rgb); transform: translateX(3px); }
+
+        .link-card .link-category {
+            position: absolute; top: 12px; right: 12px;
+            font-size: 10px; padding: 3px 10px; border-radius: 6px;
+            background: var(--rgb-soft); color: var(--rgb);
+            font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; z-index: 1;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            color: var(--text-dim);
+        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state p { font-size: 15px; }
+
+        /* ===== STATS BAR ===== */
+        .stats-row {
+            display: flex; gap: 12px; margin-bottom: 36px;
+            animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.05s backwards;
+        }
+        .stat-box {
+            flex: 1; padding: 18px; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            text-align: center; transition: all 0.3s;
+        }
+        .stat-box:hover { border-color: var(--rgb-glow); transform: translateY(-2px); }
+        .stat-box .val {
+            font-size: 22px; font-weight: 700; color: var(--rgb);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stat-box .lbl { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+        /* ===== ADMIN MODAL ===== */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: #0e0e16; border: 1px solid var(--border);
+            border-radius: 20px; width: 100%; max-width: 720px;
+            max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            animation: modalIn 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 24px 28px; border-bottom: 1px solid var(--border);
+        }
+        .modal-header h2 {
+            font-size: 20px; font-weight: 700;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .modal-close {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-dim); font-size: 18px;
+            cursor: none; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { border-color: #ef4444; color: #ef4444; }
+
+        .modal-body { padding: 24px 28px; }
+
+        /* Admin tabs */
+        .admin-tabs {
+            display: flex; gap: 6px; margin-bottom: 24px;
+            background: rgba(255,255,255,0.03); padding: 4px;
+            border-radius: 12px;
+        }
+        .admin-tab {
+            flex: 1; padding: 10px; border-radius: 10px;
+            background: transparent; border: none;
+            color: var(--text-dim); font-size: 13px; font-weight: 500;
+            cursor: none; font-family: inherit; transition: all 0.3s;
+        }
+        .admin-tab.active { background: var(--bg-card); color: var(--text); }
+        .admin-tab:hover { color: var(--text-mid); }
+
+        .admin-panel { display: none; }
+        .admin-panel.active { display: block; }
+
+        /* Form elements */
+        .form-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+            margin-bottom: 14px;
+        }
+        .form-row.full { grid-template-columns: 1fr; }
+        .form-group label {
+            display: block; font-size: 12px; font-weight: 600;
+            color: var(--text-mid); margin-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%; padding: 11px 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            color: var(--text); font-size: 14px;
+            font-family: inherit; transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none; border-color: var(--rgb);
+            box-shadow: 0 0 0 3px var(--rgb-soft);
+        }
+        .form-group input::placeholder { color: var(--text-dim); }
+        .form-group select { cursor: none; }
+        .form-group select option { background: #0e0e16; }
+
+        .btn {
+            padding: 12px 24px; border-radius: var(--radius-sm);
+            font-size: 14px; font-weight: 600; cursor: none;
+            font-family: inherit; border: none; transition: all 0.3s;
+        }
+        .btn-primary {
+            background: var(--rgb); color: #000;
+        }
+        .btn-primary:hover { box-shadow: 0 4px 15px var(--rgb-glow); transform: translateY(-1px); }
+        .btn-secondary {
+            background: var(--bg-card); border: 1px solid var(--border);
+            color: var(--text-mid);
+        }
+        .btn-secondary:hover { border-color: var(--border-hover); color: var(--text); }
+        .btn-danger {
+            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+            color: #ef4444;
+        }
+        .btn-danger:hover { background: rgba(239,68,68,0.2); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+        /* Link list in admin */
+        .admin-link-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px; background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            margin-bottom: 10px; transition: all 0.3s;
+        }
+        .admin-link-item:hover { border-color: var(--border-hover); }
+        .admin-link-item .ali-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .admin-link-item .ali-info { flex: 1; min-width: 0; }
+        .admin-link-item .ali-title { font-size: 14px; font-weight: 600; }
+        .admin-link-item .ali-url {
+            font-size: 12px; color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .admin-link-item .ali-actions { display: flex; gap: 6px; }
+
+        /* Category items */
+        .cat-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+        }
+        .cat-item .ci-emoji { font-size: 20px; }
+        .cat-item .ci-name { flex: 1; font-size: 14px; font-weight: 500; }
+
+        /* Login */
+        .login-box {
+            max-width: 360px; margin: 0 auto;
+            text-align: center;
+        }
+        .login-box p { color: var(--text-dim); font-size: 14px; margin-bottom: 20px; }
+        .login-error {
+            background: rgba(239,68,68,0.1); color: #ef4444;
+            padding: 10px; border-radius: 8px; font-size: 13px;
+            margin-bottom: 14px; display: none;
+        }
+
+        /* ===== SECTION TITLE ===== */
+        .section-title {
+            font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--text-dim); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::after {
+            content: ''; flex: 1; height: 1px; background: var(--border);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center; padding: 32px 0;
+            font-size: 13px; color: var(--text-dim);
+        }
+        .rgb-text {
+            background: linear-gradient(90deg,
+                hsl(0,100%,60%), hsl(60,100%,60%), hsl(120,100%,60%),
+                hsl(180,100%,60%), hsl(240,100%,60%), hsl(300,100%,60%), hsl(360,100%,60%));
+            background-size: 300% 100%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rgbShift 3s linear infinite;
+        }
+        @keyframes rgbShift { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: hsl(var(--hue), 40%, 25%); border-radius: 10px; }
+        .modal::-webkit-scrollbar { width: 4px; }
+
+        ::selection { background: var(--rgb-soft); color: var(--rgb); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .container { padding: 32px 16px 100px; }
+            .site-header h1 { font-size: 28px; }
+            .links-grid { grid-template-columns: 1fr; }
+            .stats-row { flex-direction: column; }
+            .form-row { grid-template-columns: 1fr; }
+            .modal { max-height: 90vh; border-radius: 16px; }
+            .modal-body { padding: 16px; }
+            .cursor-dot, .cursor-ring { display: none; }
+            body { cursor: auto; }
+            .link-card, .cat-btn, .tag-btn, .btn, .admin-fab,
+            .modal-close, .admin-tab, .search-input { cursor: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<canvas id="particles"></canvas>
+<div class="rgb-bg"></div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="site-header">
+        <div class="logo-ring"><div class="logo-inner">N</div></div>
+        <h1 class="rgb-text">Nexus Library</h1>
+        <p class="subtitle">Explore e descubra links organizados por categorias, tags e muito mais.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="val" id="sLinks">0</div>
+            <div class="lbl">Links</div>
+        </div>
+        <div class="stat-box">
+            <div class="val" id="sCats">0</div>
+            <div class="lbl">Categorias</div>
+        </div>
+        <div class="stat-box">
+            <div class="val" id="sTags">0</div>
+            <div class="lbl">Tags</div>
+        </div>
+        <div class="stat-box">
+            <div class="val" id="sClicks">0</div>
+            <div class="lbl">Acessos</div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrapper">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar links por nome, descrição ou URL...">
+        <span class="search-count" id="searchCount"></span>
+    </div>
+
+    <!-- Categories -->
+    <div class="section-title">Categorias</div>
+    <div class="categories-bar" id="categoriesBar"></div>
+
+    <!-- Tags -->
+    <div class="section-title">Tags</div>
+    <div class="tags-bar" id="tagsBar"></div>
+
+    <!-- Links Grid -->
+    <div class="section-title">Links</div>
+    <div class="links-grid" id="linksGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none">
+        <div class="icon">🔍</div>
+        <p>Nenhum link encontrado com esses filtros.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        Feito com <span class="rgb-text">♥</span> por Nexus &mdash; 2025
+    </div>
+</div>
+
+<!-- Admin FAB -->
+<button class="admin-fab" id="adminFab" title="Painel Admin">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+    </svg>
+</button>
+
+<!-- Admin Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+        <!-- Login View -->
+        <div id="adminLogin">
+            <div class="modal-header">
+                <h2>🔐 Acesso Admin</h2>
+                <button class="modal-close" id="closeModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="login-box">
+                    <p>Digite a senha para acessar o painel de gerenciamento.</p>
+                    <div class="login-error" id="loginErr">Senha incorreta</div>
+                    <div class="form-group" style="margin-bottom:14px">
+                        <input type="password" id="adminPass" placeholder="Senha do admin" style="text-align:center">
+                    </div>
+                    <button class="btn btn-primary" id="loginBtn" style="width:100%">Entrar</button>
+                    <p style="margin-top:14px; font-size:12px; color:var(--text-dim)">Senha padrão: <strong>nexus123</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel View -->
+        <div id="adminPanel" style="display:none">
+            <div class="modal-header">
+                <h2>⚙️ Painel Admin</h2>
+                <button class="modal-close" id="closeModal2">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-tab="links">Links</button>
+                    <button class="admin-tab" data-tab="categories">Categorias</button>
+                    <button class="admin-tab" data-tab="settings">Config</button>
+                </div>
+
+                <!-- LINKS TAB -->
+                <div class="admin-panel active" id="tab-links">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+                        <h3 style="font-size:16px; font-weight:600">Gerenciar Links</h3>
+                        <button class="btn btn-primary btn-sm" id="btnNewLink">+ Novo Link</button>
+                    </div>
+                    <div id="adminLinksList"></div>
+
+                    <!-- Link Form -->
+                    <div id="linkForm" style="display:none; margin-top:20px; padding-top:20px; border-top:1px solid var(--border)">
+                        <h4 style="font-size:14px; font-weight:600; margin-bottom:14px" id="linkFormTitle">Novo Link</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Título</label>
+                                <input type="text" id="fTitle" placeholder="Nome do link">
+                            </div>
+                            <div class="form-group">
+                                <label>Emoji / Ícone</label>
+                                <input type="text" id="fIcon" placeholder="🔗" style="text-align:center">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>URL</label>
+                                <input type="text" id="fUrl" placeholder="https://...">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Descrição</label>
+                                <input type="text" id="fDesc" placeholder="Breve descrição do link">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Categoria</label>
+                                <select id="fCategory"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cor (hex)</label>
+                                <input type="text" id="fColor" placeholder="#4f6ef7">
+                            </div>
+                        </div>
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label>Tags (separadas por vírgula)</label>
+                                <input type="text" id="fTags" placeholder="ferramenta, produtividade, gratuito">
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:8px">
+                            <button class="btn btn-primary" id="btnSaveLink">Salvar</button>
+                            <button class="btn btn-secondary" id="btnCancelLink">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORIES TAB -->
+                <div class="admin-panel" id="tab-categories">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+                        <h3 style="font-size:16px; font-weight:600">Categorias</h3>
+                    </div>
+                    <div class="form-row" style="margin-bottom:16px">
+                        <div class="form-group">
+                            <label>Emoji</label>
+                            <input type="text" id="newCatEmoji" placeholder="📁" style="text-align:center">
+                        </div>
+                        <div class="form-group">
+                            <label>Nome</label>
+                            <input type="text" id="newCatName" placeholder="Nome da categoria">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btnAddCat" style="margin-bottom:16px">+ Adicionar Categoria</button>
+                    <div id="adminCatsList"></div>
+                </div>
+
+                <!-- SETTINGS TAB -->
+                <div class="admin-panel" id="tab-settings">
+                    <h3 style="font-size:16px; font-weight:600; margin-bottom:16px">Configurações</h3>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label>Senha do Admin</label>
+                            <input type="text" id="setPassword" placeholder="Nova senha">
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap">
+                        <button class="btn btn-primary btn-sm" id="btnSavePass">Salvar Senha</button>
+                        <button class="btn btn-danger btn-sm" id="btnResetData">Resetar Tudo</button>
+                        <button class="btn btn-secondary btn-sm" id="btnExport">Exportar JSON</button>
+                        <button class="btn btn-secondary btn-sm" id="btnImport">Importar JSON</button>
+                    </div>
+                    <input type="file" id="importFile" accept=".json" style="display:none">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== DEFAULT DATA =====
+const DEFAULT_CATEGORIES = [
+    { id: 'social', name: 'Redes Sociais', emoji: '💬' },
+    { id: 'dev', name: 'Desenvolvimento', emoji: '💻' },
+    { id: 'tools', name: 'Ferramentas', emoji: '🔧' },
+    { id: 'design', name: 'Design', emoji: '🎨' },
+    { id: 'learn', name: 'Aprendizado', emoji: '📚' },
+    { id: 'games', name: 'Jogos', emoji: '🎮' },
+    { id: 'other', name: 'Outros', emoji: '🌐' },
+];
+
+const DEFAULT_LINKS = [
+    { id: 1, title: 'GitHub', url: 'https://github.com', desc: 'Plataforma de hospedagem de código com controle de versão Git.', icon: '🐙', color: '#333', category: 'dev', tags: ['código', 'git', 'gratuito'] },
+    { id: 2, title: 'YouTube', url: 'https://youtube.com', desc: 'A maior plataforma de vídeos do mundo. Tutoriais, entretenimento e mais.', icon: '🎬', color: '#ff0000', category: 'social', tags: ['vídeo', 'streaming'] },
+    { id: 3, title: 'Figma', url: 'https://figma.com', desc: 'Ferramenta de design de interfaces colaborativa baseada na web.', icon: '🎨', color: '#a259ff', category: 'design', tags: ['ui', 'design', 'colaborativo'] },
+    { id: 4, title: 'Stack Overflow', url: 'https://stackoverflow.com', desc: 'Comunidade de perguntas e respostas para programadores.', icon: '📖', color: '#f48024', category: 'dev', tags: ['programação', 'ajuda', 'gratuito'] },
+    { id: 5, title: 'Notion', url: 'https://notion.so', desc: 'Workspace all-in-one para notas, docs, wikis e gerenciamento de projetos.', icon: '📝', color: '#000', category: 'tools', tags: ['produtividade', 'notas', 'gratuito'] },
+    { id: 6, title: 'Discord', url: 'https://discord.com', desc: 'Comunicação por voz, vídeo e texto para comunidades e amigos.', icon: '💬', color: '#5865f2', category: 'social', tags: ['chat', 'comunidade', 'gratuito'] },
+    { id: 7, title: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: 'Documentação completa para tecnologias web: HTML, CSS, JS e mais.', icon: '📘', color: '#1b1b1b', category: 'learn', tags: ['documentação', 'web', 'gratuito'] },
+    { id: 8, title: 'Dribbble', url: 'https://dribbble.com', desc: 'Comunidade de designers para compartilhar e descobrir trabalhos criativos.', icon: '🏀', color: '#ea4c89', category: 'design', tags: ['inspiração', 'design'] },
+    { id: 9, title: 'Steam', url: 'https://store.steampowered.com', desc: 'A maior plataforma de jogos para PC. Milhares de títulos disponíveis.', icon: '🎮', color: '#1b2838', category: 'games', tags: ['jogos', 'pc'] },
+    { id: 10, title: 'ChatGPT', url: 'https://chat.openai.com', desc: 'Assistente de IA conversacional da OpenAI para diversas tarefas.', icon: '🤖', color: '#10a37f', category: 'tools', tags: ['ia', 'chatbot', 'gratuito'] },
+    { id: 11, title: 'Coursera', url: 'https://coursera.org', desc: 'Cursos online de universidades renomadas em diversas áreas.', icon: '🎓', color: '#0056d2', category: 'learn', tags: ['cursos', 'educação'] },
+    { id: 12, title: 'Twitch', url: 'https://twitch.tv', desc: 'Plataforma de streaming ao vivo, focada em jogos e conteúdo ao vivo.', icon: '📺', color: '#9146ff', category: 'social', tags: ['streaming', 'jogos', 'ao vivo'] },
+];
+
+// ===== STATE =====
+let links = [];
+let categories = [];
+let totalClicks = 0;
+let adminPassword = 'nexus123';
+let activeCategory = 'all';
+let activeTag = null;
+let editingLinkIndex = -1;
+
+// ===== LOAD STATE =====
+function loadState() {
+    links = JSON.parse(localStorage.getItem('nx_links')) || JSON.parse(JSON.stringify(DEFAULT_LINKS));
+    categories = JSON.parse(localStorage.getItem('nx_cats')) || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+    totalClicks = parseInt(localStorage.getItem('nx_clicks')) || 0;
+    adminPassword = localStorage.getItem('nx_pass') || 'nexus123';
+}
+function saveState() {
+    localStorage.setItem('nx_links', JSON.stringify(links));
+    localStorage.setItem('nx_cats', JSON.stringify(categories));
+    localStorage.setItem('nx_clicks', totalClicks);
+    localStorage.setItem('nx_pass', adminPassword);
+}
+
+// ===== RENDER =====
+function getAllTags() {
+    const tagSet = new Set();
+    links.forEach(l => (l.tags || []).forEach(t => tagSet.add(t)));
+    return [...tagSet].sort();
+}
+
+function getFilteredLinks() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    return links.filter(l => {
+        const matchCat = activeCategory === 'all' || l.category === activeCategory;
+        const matchTag = !activeTag || (l.tags || []).includes(activeTag);
+        const matchSearch = !q ||
+            l.title.toLowerCase().includes(q) ||
+            l.desc.toLowerCase().includes(q) ||
+            l.url.toLowerCase().includes(q) ||
+            (l.tags || []).some(t => t.toLowerCase().includes(q));
+        return matchCat && matchTag && matchSearch;
+    });
+}
+
+function renderAll() {
+    renderCategories();
+    renderTags();
+    renderLinks();
+    renderStats();
+}
+
+function renderCategories() {
+    const bar = document.getElementById('categoriesBar');
+    const allCount = links.length;
+    let html = `<button class="cat-btn ${activeCategory === 'all' ? 'active' : ''}" data-cat="all">Todos <span class="cat-count">${allCount}</span></button>`;
+    categories.forEach(c => {
+        const count = links.filter(l => l.category === c.id).length;
+        html += `<button class="cat-btn ${activeCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.emoji} ${c.name} <span class="cat-count">${count}</span></button>`;
+    });
+    bar.innerHTML = html;
+
+    bar.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            activeCategory = btn.dataset.cat;
+            renderAll();
+        });
+    });
+}
+
+function renderTags() {
+    const bar = document.getElementById('tagsBar');
+    const tags = getAllTags();
+    let html = '';
+    tags.forEach(t => {
+        html += `<button class="tag-btn ${activeTag === t ? 'active' : ''}" data-tag="${t}">#${t}</button>`;
+    });
+    bar.innerHTML = html;
+
+    bar.querySelectorAll('.tag-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tag = btn.dataset.tag;
+            activeTag = activeTag === tag ? null : tag;
+            renderAll();
+        });
+    });
+}
+
+function renderLinks() {
+    const grid = document.getElementById('linksGrid');
+    const empty = document.getElementById('emptyState');
+    const filtered = getFilteredLinks();
+
+    document.getElementById('searchCount').textContent = `${filtered.length} / ${links.length}`;
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+
+    grid.innerHTML = filtered.map((l, i) => {
+        const cat = categories.find(c => c.id === l.category);
+        return `
+        <a href="${l.url}" target="_blank" rel="noopener" class="link-card" onclick="trackClick()" style="animation-delay:${i * 0.04}s">
+            <span class="link-category">${cat ? cat.emoji + ' ' + cat.name : ''}</span>
+            <div class="link-top">
+                <div class="link-icon" style="background:${l.color}20; color:${l.color}">${l.icon || '🔗'}</div>
+                <div class="link-info">
+                    <div class="link-title">${l.title}</div>
+                    <div class="link-url">${l.url}</div>
+                </div>
+            </div>
+            <div class="link-desc">${l.desc}</div>
+            <div class="link-footer">
+                <div class="link-tags">${(l.tags || []).map(t => `<span class="link-tag">#${t}</span>`).join('')}</div>
+                <span class="link-arrow">→</span>
+            </div>
+        </a>`;
+    }).join('');
+}
+
+function renderStats() {
+    document.getElementById('sLinks').textContent = links.length;
+    document.getElementById('sCats').textContent = categories.length;
+    document.getElementById('sTags').textContent = getAllTags().length;
+    document.getElementById('sClicks').textContent = totalClicks;
+}
+
+function trackClick() { totalClicks++; saveState(); renderStats(); }
+
+// ===== SEARCH =====
+document.getElementById('searchInput').addEventListener('input', () => renderLinks());
+
+// ===== ADMIN =====
+const overlay = document.getElementById('modalOverlay');
+const adminLogin = document.getElementById('adminLogin');
+const adminPanel = document.getElementById('adminPanel');
+
+document.getElementById('adminFab').addEventListener('click', () => {
+    overlay.classList.add('show');
+    adminLogin.style.display = '';
+    adminPanel.style.display = 'none';
+    document.getElementById('adminPass').value = '';
+    document.getElementById('adminPass').focus();
+});
+
+document.getElementById('closeModal').addEventListener('click', () => overlay.classList.remove('show'));
+document.getElementById('closeModal2').addEventListener('click', () => overlay.classList.remove('show'));
+overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+
+document.getElementById('loginBtn').addEventListener('click', () => {
+    if (document.getElementById('adminPass').value === adminPassword) {
+        adminLogin.style.display = 'none';
+        adminPanel.style.display = '';
+        renderAdminLinks();
+        renderAdminCategories();
+        document.getElementById('setPassword').value = '';
+    } else {
+        document.getElementById('loginErr').style.display = 'block';
+        setTimeout(() => document.getElementById('loginErr').style.display = 'none', 3000);
+    }
+});
+document.getElementById('adminPass').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+// Admin tabs
+document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+});
+
+// ===== ADMIN LINKS =====
+function renderAdminLinks() {
+    const list = document.getElementById('adminLinksList');
+    list.innerHTML = links.map((l, i) => `
+        <div class="admin-link-item">
+            <div class="ali-icon" style="background:${l.color}20; color:${l.color}">${l.icon || '🔗'}</div>
+            <div class="ali-info">
+                <div class="ali-title">${l.title}</div>
+                <div class="ali-url">${l.url}</div>
+            </div>
+            <div class="ali-actions">
+                <button class="btn btn-secondary btn-sm" onclick="editLink(${i})">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteLink(${i})">×</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function populateCategorySelect() {
+    const sel = document.getElementById('fCategory');
+    sel.innerHTML = categories.map(c => `<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+}
+
+document.getElementById('btnNewLink').addEventListener('click', () => {
+    editingLinkIndex = -1;
+    document.getElementById('linkFormTitle').textContent = 'Novo Link';
+    document.getElementById('fTitle').value = '';
+    document.getElementById('fIcon').value = '🔗';
+    document.getElementById('fUrl').value = 'https://';
+    document.getElementById('fDesc').value = '';
+    document.getElementById('fColor').value = '#4f6ef7';
+    document.getElementById('fTags').value = '';
+    populateCategorySelect();
+    document.getElementById('linkForm').style.display = '';
+    document.getElementById('fTitle').focus();
+});
+
+window.editLink = function(i) {
+    editingLinkIndex = i;
+    const l = links[i];
+    document.getElementById('linkFormTitle').textContent = 'Editar Link';
+    document.getElementById('fTitle').value = l.title;
+    document.getElementById('fIcon').value = l.icon || '';
+    document.getElementById('fUrl').value = l.url;
+    document.getElementById('fDesc').value = l.desc;
+    document.getElementById('fColor').value = l.color || '#4f6ef7';
+    document.getElementById('fTags').value = (l.tags || []).join(', ');
+    populateCategorySelect();
+    document.getElementById('fCategory').value = l.category || categories[0]?.id || '';
+    document.getElementById('linkForm').style.display = '';
+    document.getElementById('fTitle').focus();
+};
+
+window.deleteLink = function(i) {
+    if (confirm(`Excluir "${links[i].title}"?`)) {
+        links.splice(i, 1);
+        saveState();
+        renderAll();
+        renderAdminLinks();
+    }
+};
+
+document.getElementById('btnSaveLink').addEventListener('click', () => {
+    const data = {
+        title: document.getElementById('fTitle').value.trim(),
+        icon: document.getElementById('fIcon').value.trim() || '🔗',
+        url: document.getElementById('fUrl').value.trim(),
+        desc: document.getElementById('fDesc').value.trim(),
+        color: document.getElementById('fColor').value.trim() || '#4f6ef7',
+        category: document.getElementById('fCategory').value,
+        tags: document.getElementById('fTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    };
+    if (!data.title || !data.url) return alert('Título e URL são obrigatórios.');
+
+    if (editingLinkIndex >= 0) {
+        data.id = links[editingLinkIndex].id;
+        links[editingLinkIndex] = data;
+    } else {
+        data.id = Date.now();
+        links.push(data);
+    }
+    saveState();
+    document.getElementById('linkForm').style.display = 'none';
+    renderAll();
+    renderAdminLinks();
+});
+
+document.getElementById('btnCancelLink').addEventListener('click', () => {
+    document.getElementById('linkForm').style.display = 'none';
+});
+
+// ===== ADMIN CATEGORIES =====
+function renderAdminCategories() {
+    const list = document.getElementById('adminCatsList');
+    list.innerHTML = categories.map((c, i) => `
+        <div class="cat-item">
+            <span class="ci-emoji">${c.emoji}</span>
+            <span class="ci-name">${c.name}</span>
+            <span style="font-size:12px; color:var(--text-dim); font-family:'JetBrains Mono',monospace">${c.id}</span>
+            <button class="btn btn-danger btn-sm" onclick="deleteCategory(${i})">×</button>
+        </div>
+    `).join('');
+}
+
+document.getElementById('btnAddCat').addEventListener('click', () => {
+    const emoji = document.getElementById('newCatEmoji').value.trim() || '📁';
+    const name = document.getElementById('newCatName').value.trim();
+    if (!name) return alert('Nome é obrigatório.');
+    const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (categories.find(c => c.id === id)) return alert('Categoria já existe.');
+    categories.push({ id, name, emoji });
+    saveState();
+    renderAll();
+    renderAdminCategories();
+    document.getElementById('newCatEmoji').value = '';
+    document.getElementById('newCatName').value = '';
+});
+
+window.deleteCategory = function(i) {
+    const cat = categories[i];
+    const used = links.filter(l => l.category === cat.id).length;
+    if (used > 0 && !confirm(`"${cat.name}" tem ${used} link(s). Excluir mesmo?`)) return;
+    links.forEach(l => { if (l.category === cat.id) l.category = 'other'; });
+    categories.splice(i, 1);
+    saveState();
+    renderAll();
+    renderAdminCategories();
+};
+
+// ===== SETTINGS =====
+document.getElementById('btnSavePass').addEventListener('click', () => {
+    const newPass = document.getElementById('setPassword').value.trim();
+    if (newPass.length < 4) return alert('Senha deve ter pelo menos 4 caracteres.');
+    adminPassword = newPass;
+    saveState();
+    alert('Senha atualizada!');
+});
+
+document.getElementById('btnResetData').addEventListener('click', () => {
+    if (!confirm('Resetar TODOS os dados? Isso não pode ser desfeito.')) return;
+    localStorage.removeItem('nx_links');
+    localStorage.removeItem('nx_cats');
+    localStorage.removeItem('nx_clicks');
+    localStorage.removeItem('nx_pass');
+    location.reload();
+});
+
+document.getElementById('btnExport').addEventListener('click', () => {
+    const data = { links, categories, adminPassword };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'nexus-library-backup.json';
+    a.click();
+});
+
+document.getElementById('btnImport').addEventListener('click', () => {
+    document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const data = JSON.parse(reader.result);
+            if (data.links) links = data.links;
+            if (data.categories) categories = data.categories;
+            if (data.adminPassword) adminPassword = data.adminPassword;
+            saveState();
+            renderAll();
+            renderAdminLinks();
+            renderAdminCategories();
+            alert('Dados importados com sucesso!');
+        } catch { alert('Arquivo JSON inválido.'); }
+    };
+    reader.readAsText(file);
+});
+
+// ===== PARTICLES =====
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particlesArr = [];
+let mouseX = 0, mouseY = 0;
+
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+    constructor() { this.reset(); this.y = Math.random() * canvas.height; }
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -10 - Math.random() * 80;
+        this.size = 1.5 + Math.random() * 3.5;
+        this.speedY = 0.25 + Math.random() * 0.6;
+        this.speedX = (Math.random() - 0.5) * 0.2;
+        this.opacity = 0.12 + Math.random() * 0.3;
+        this.hueOff = Math.random() * 360;
+        this.wobble = Math.random() * Math.PI * 2;
+        this.wobbleSpd = 0.008 + Math.random() * 0.015;
+    }
+    update() {
+        this.y += this.speedY;
+        this.wobble += this.wobbleSpd;
+        this.x += this.speedX + Math.sin(this.wobble) * 0.25;
+        const dx = mouseX - this.x, dy = mouseY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) { this.x += dx * 0.0008; this.y += dy * 0.0008; }
+        if (this.y > canvas.height + 10) this.reset();
+    }
+    draw() {
+        const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hue')) + this.hueOff;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${h}, 80%, 65%, ${this.opacity})`;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${h}, 80%, 65%, ${this.opacity * 0.12})`;
+        ctx.fill();
+    }
+}
+
+for (let i = 0; i < 55; i++) particlesArr.push(new Particle());
+
+function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particlesArr.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ===== RGB CYCLING =====
+let hue = 0;
+function cycleRGB() {
+    hue = (hue + 0.25) % 360;
+    document.documentElement.style.setProperty('--hue', hue);
+    requestAnimationFrame(cycleRGB);
+}
+cycleRGB();
+
+// ===== CUSTOM CURSOR =====
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let dotX = 0, dotY = 0, ringX = 0, ringY = 0;
+
+document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    dotX = e.clientX; dotY = e.clientY;
+});
+
+function animateCursor() {
+    ringX += (dotX - ringX) * 0.1;
+    ringY += (dotY - ringY) * 0.1;
+    dot.style.left = dotX - 4 + 'px';
+    dot.style.top = dotY - 4 + 'px';
+    ring.style.left = ringX - 19 + 'px';
+    ring.style.top = ringY - 19 + 'px';
+    requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.addEventListener('mouseover', (e) => {
+    if (e.target.closest('.link-card, .cat-btn, .tag-btn, .btn, .admin-fab, .modal-close, .admin-tab, a, button, input, select')) {
+        ring.classList.add('hover');
+    }
+});
+document.addEventListener('mouseout', (e) => {
+    if (e.target.closest('.link-card, .cat-btn, .tag-btn, .btn, .admin-fab, .modal-close, .admin-tab, a, button, input, select')) {
+        ring.classList.remove('hover');
+    }
+});
+document.addEventListener('mousedown', () => dot.classList.add('click'));
+document.addEventListener('mouseup', () => dot.classList.remove('click'));
+
+// ===== PARALLAX =====
+document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 15;
+    const y = (e.clientY / window.innerHeight - 0.5) * 15;
+    document.querySelector('.rgb-bg').style.transform = `translate(${x}px, ${y}px)`;
+});
+
+// ===== INIT =====
+loadState();
+renderAll();
+</script>
+</body>
+</html>
