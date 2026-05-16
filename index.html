@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Library — Biblioteca de Links</title>
+    <title>Biel — Links</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,6 +13,7 @@
             --rgb: hsl(var(--hue), 100%, 60%);
             --rgb-glow: hsla(var(--hue), 100%, 60%, 0.4);
             --rgb-soft: hsla(var(--hue), 100%, 60%, 0.12);
+            --rgb-strong: hsla(var(--hue), 100%, 60%, 0.25);
             --bg: #08080d;
             --bg-card: rgba(14, 14, 22, 0.75);
             --bg-card-hover: rgba(20, 20, 32, 0.85);
@@ -41,8 +42,11 @@
         .rgb-bg {
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background:
-                radial-gradient(ellipse 700px 500px at 15% 25%, hsla(var(--hue), 70%, 50%, 0.06), transparent),
-                radial-gradient(ellipse 500px 400px at 85% 75%, hsla(calc(var(--hue) + 120), 70%, 50%, 0.05), transparent);
+                radial-gradient(ellipse 800px 600px at 10% 20%, hsla(var(--hue), 80%, 50%, 0.1), transparent),
+                radial-gradient(ellipse 600px 500px at 90% 80%, hsla(calc(var(--hue) + 120), 80%, 50%, 0.08), transparent),
+                radial-gradient(ellipse 500px 400px at 50% 50%, hsla(calc(var(--hue) + 240), 70%, 50%, 0.06), transparent),
+                radial-gradient(ellipse 400px 300px at 30% 70%, hsla(calc(var(--hue) + 60), 70%, 50%, 0.05), transparent),
+                radial-gradient(ellipse 400px 300px at 70% 30%, hsla(calc(var(--hue) + 180), 70%, 50%, 0.05), transparent);
             transition: background 1s ease;
         }
 
@@ -81,8 +85,8 @@
         }
 
         .logo-ring {
-            width: 90px; height: 90px; border-radius: 50%;
-            margin: 0 auto 20px; padding: 3px;
+            width: 110px; height: 110px; border-radius: 50%;
+            margin: 0 auto 24px; padding: 3px;
             background: conic-gradient(
                 hsl(var(--hue), 100%, 60%),
                 hsl(calc(var(--hue) + 120), 100%, 60%),
@@ -90,24 +94,69 @@
                 hsl(var(--hue), 100%, 60%)
             );
             animation: spin 5s linear infinite;
+            filter: drop-shadow(0 0 20px var(--rgb-glow));
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .logo-ring .logo-inner {
             width: 100%; height: 100%; border-radius: 50%;
             background: var(--bg); display: flex;
             align-items: center; justify-content: center;
-            font-size: 34px; font-weight: 700; color: var(--rgb);
+            font-size: 42px; font-weight: 700; color: var(--rgb);
+            text-shadow: 0 0 20px var(--rgb-glow), 0 0 40px var(--rgb-glow);
         }
 
         .site-header h1 {
-            font-size: 36px; font-weight: 700;
+            font-size: 44px; font-weight: 700;
             background: linear-gradient(135deg, #fff, var(--rgb));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text; margin-bottom: 8px;
+            background-clip: text; margin-bottom: 10px;
+            text-shadow: 0 0 60px var(--rgb-glow);
+            filter: drop-shadow(0 0 30px var(--rgb-glow));
         }
         .site-header .subtitle {
             color: var(--text-dim); font-size: 15px; max-width: 500px; margin: 0 auto;
         }
+
+        /* ===== SOCIAL LINKS (HIGHLIGHT) ===== */
+        .social-row {
+            display: flex; gap: 14px; justify-content: center;
+            margin-top: 24px; flex-wrap: wrap;
+            animation: fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s backwards;
+        }
+        .social-btn {
+            display: flex; align-items: center; gap: 10px;
+            padding: 14px 28px; border-radius: 16px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            cursor: none; transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            text-decoration: none; color: inherit; font-weight: 600;
+            font-size: 15px; position: relative; overflow: hidden;
+        }
+        .social-btn::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, var(--rgb-soft), transparent 60%);
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .social-btn:hover::before { opacity: 1; }
+        .social-btn:hover {
+            border-color: var(--rgb-glow);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 40px var(--rgb-glow), 0 0 30px var(--rgb-glow);
+        }
+        .social-btn .s-icon {
+            font-size: 22px; position: relative; z-index: 1;
+            transition: transform 0.3s;
+        }
+        .social-btn:hover .s-icon { transform: scale(1.15) rotate(-5deg); }
+        .social-btn .s-label { position: relative; z-index: 1; }
+        .social-btn .s-arrow {
+            position: relative; z-index: 1;
+            transition: all 0.3s; color: var(--text-dim);
+        }
+        .social-btn:hover .s-arrow { color: var(--rgb); transform: translateX(4px); }
+        .social-btn.youtube { border-color: rgba(255,0,0,0.2); }
+        .social-btn.youtube:hover { border-color: rgba(255,0,0,0.5); box-shadow: 0 12px 40px rgba(255,0,0,0.2); }
+        .social-btn.discord { border-color: rgba(88,101,242,0.2); }
+        .social-btn.discord:hover { border-color: rgba(88,101,242,0.5); box-shadow: 0 12px 40px rgba(88,101,242,0.2); }
 
         /* ===== ADMIN BUTTON ===== */
         .admin-fab {
@@ -506,9 +555,21 @@
 <div class="container">
     <!-- Header -->
     <div class="site-header">
-        <div class="logo-ring"><div class="logo-inner">N</div></div>
-        <h1 class="rgb-text">Nexus Library</h1>
-        <p class="subtitle">Explore e descubra links organizados por categorias, tags e muito mais.</p>
+        <div class="logo-ring"><div class="logo-inner">B</div></div>
+        <h1 class="rgb-text">Biel</h1>
+        <p class="subtitle">Meus links, redes sociais e conteúdos favoritos. Tudo em um só lugar.</p>
+        <div class="social-row">
+            <a href="https://www.youtube.com/@toddyShxReff" target="_blank" rel="noopener" class="social-btn youtube">
+                <span class="s-icon">🎬</span>
+                <span class="s-label">YouTube</span>
+                <span class="s-arrow">→</span>
+            </a>
+            <a href="https://discord.gg/PxSJgBzrMx" target="_blank" rel="noopener" class="social-btn discord">
+                <span class="s-icon">💬</span>
+                <span class="s-label">Junte-se à Big Comunidade</span>
+                <span class="s-arrow">→</span>
+            </a>
+        </div>
     </div>
 
     <!-- Stats -->
@@ -558,7 +619,7 @@
 
     <!-- Footer -->
     <div class="footer">
-        Feito com <span class="rgb-text">♥</span> por Nexus &mdash; 2025
+        Feito com <span class="rgb-text">♥</span> por Biel &mdash; 2025
     </div>
 </div>
 
@@ -586,7 +647,6 @@
                         <input type="password" id="adminPass" placeholder="Senha do admin" style="text-align:center">
                     </div>
                     <button class="btn btn-primary" id="loginBtn" style="width:100%">Entrar</button>
-                    <p style="margin-top:14px; font-size:12px; color:var(--text-dim)">Senha padrão: <strong>nexus123</strong></p>
                 </div>
             </div>
         </div>
@@ -714,41 +774,39 @@ const DEFAULT_CATEGORIES = [
 ];
 
 const DEFAULT_LINKS = [
-    { id: 1, title: 'GitHub', url: 'https://github.com', desc: 'Plataforma de hospedagem de código com controle de versão Git.', icon: '🐙', color: '#333', category: 'dev', tags: ['código', 'git', 'gratuito'] },
-    { id: 2, title: 'YouTube', url: 'https://youtube.com', desc: 'A maior plataforma de vídeos do mundo. Tutoriais, entretenimento e mais.', icon: '🎬', color: '#ff0000', category: 'social', tags: ['vídeo', 'streaming'] },
-    { id: 3, title: 'Figma', url: 'https://figma.com', desc: 'Ferramenta de design de interfaces colaborativa baseada na web.', icon: '🎨', color: '#a259ff', category: 'design', tags: ['ui', 'design', 'colaborativo'] },
-    { id: 4, title: 'Stack Overflow', url: 'https://stackoverflow.com', desc: 'Comunidade de perguntas e respostas para programadores.', icon: '📖', color: '#f48024', category: 'dev', tags: ['programação', 'ajuda', 'gratuito'] },
-    { id: 5, title: 'Notion', url: 'https://notion.so', desc: 'Workspace all-in-one para notas, docs, wikis e gerenciamento de projetos.', icon: '📝', color: '#000', category: 'tools', tags: ['produtividade', 'notas', 'gratuito'] },
-    { id: 6, title: 'Discord', url: 'https://discord.com', desc: 'Comunicação por voz, vídeo e texto para comunidades e amigos.', icon: '💬', color: '#5865f2', category: 'social', tags: ['chat', 'comunidade', 'gratuito'] },
-    { id: 7, title: 'MDN Web Docs', url: 'https://developer.mozilla.org', desc: 'Documentação completa para tecnologias web: HTML, CSS, JS e mais.', icon: '📘', color: '#1b1b1b', category: 'learn', tags: ['documentação', 'web', 'gratuito'] },
-    { id: 8, title: 'Dribbble', url: 'https://dribbble.com', desc: 'Comunidade de designers para compartilhar e descobrir trabalhos criativos.', icon: '🏀', color: '#ea4c89', category: 'design', tags: ['inspiração', 'design'] },
-    { id: 9, title: 'Steam', url: 'https://store.steampowered.com', desc: 'A maior plataforma de jogos para PC. Milhares de títulos disponíveis.', icon: '🎮', color: '#1b2838', category: 'games', tags: ['jogos', 'pc'] },
-    { id: 10, title: 'ChatGPT', url: 'https://chat.openai.com', desc: 'Assistente de IA conversacional da OpenAI para diversas tarefas.', icon: '🤖', color: '#10a37f', category: 'tools', tags: ['ia', 'chatbot', 'gratuito'] },
-    { id: 11, title: 'Coursera', url: 'https://coursera.org', desc: 'Cursos online de universidades renomadas em diversas áreas.', icon: '🎓', color: '#0056d2', category: 'learn', tags: ['cursos', 'educação'] },
-    { id: 12, title: 'Twitch', url: 'https://twitch.tv', desc: 'Plataforma de streaming ao vivo, focada em jogos e conteúdo ao vivo.', icon: '📺', color: '#9146ff', category: 'social', tags: ['streaming', 'jogos', 'ao vivo'] },
+    { id: 1, title: 'YouTube — ToddyShxReff', url: 'https://www.youtube.com/@toddyShxReff', desc: 'Meu canal no YouTube. Inscreva-se para não perder os vídeos!', icon: '🎬', color: '#ff0000', category: 'social', tags: ['vídeo', 'streaming', 'youtube'] },
+    { id: 2, title: 'Discord — Big Comunidade', url: 'https://discord.gg/PxSJgBzrMx', desc: 'Junte-se à Big Comunidade! Faça parte do servidor.', icon: '💬', color: '#5865f2', category: 'social', tags: ['chat', 'comunidade', 'discord'] },
+    { id: 3, title: 'GitHub', url: 'https://github.com', desc: 'Plataforma de hospedagem de código com controle de versão Git.', icon: '🐙', color: '#333', category: 'dev', tags: ['código', 'git', 'gratuito'] },
+    { id: 4, title: 'Figma', url: 'https://figma.com', desc: 'Ferramenta de design de interfaces colaborativa baseada na web.', icon: '🎨', color: '#a259ff', category: 'design', tags: ['ui', 'design', 'colaborativo'] },
+    { id: 5, title: 'Stack Overflow', url: 'https://stackoverflow.com', desc: 'Comunidade de perguntas e respostas para programadores.', icon: '📖', color: '#f48024', category: 'dev', tags: ['programação', 'ajuda', 'gratuito'] },
+    { id: 6, title: 'Notion', url: 'https://notion.so', desc: 'Workspace all-in-one para notas, docs, wikis e gerenciamento de projetos.', icon: '📝', color: '#000', category: 'tools', tags: ['produtividade', 'notas', 'gratuito'] },
+    { id: 7, title: 'Steam', url: 'https://store.steampowered.com', desc: 'A maior plataforma de jogos para PC. Milhares de títulos disponíveis.', icon: '🎮', color: '#1b2838', category: 'games', tags: ['jogos', 'pc'] },
+    { id: 8, title: 'ChatGPT', url: 'https://chat.openai.com', desc: 'Assistente de IA conversacional da OpenAI para diversas tarefas.', icon: '🤖', color: '#10a37f', category: 'tools', tags: ['ia', 'chatbot', 'gratuito'] },
+    { id: 9, title: 'Twitch', url: 'https://twitch.tv', desc: 'Plataforma de streaming ao vivo, focada em jogos e conteúdo ao vivo.', icon: '📺', color: '#9146ff', category: 'social', tags: ['streaming', 'jogos', 'ao vivo'] },
+    { id: 10, title: 'Dribbble', url: 'https://dribbble.com', desc: 'Comunidade de designers para compartilhar e descobrir trabalhos criativos.', icon: '🏀', color: '#ea4c89', category: 'design', tags: ['inspiração', 'design'] },
 ];
 
 // ===== STATE =====
 let links = [];
 let categories = [];
 let totalClicks = 0;
-let adminPassword = 'nexus123';
+let adminPassword = 'bieldexx07';
 let activeCategory = 'all';
 let activeTag = null;
 let editingLinkIndex = -1;
 
 // ===== LOAD STATE =====
 function loadState() {
-    links = JSON.parse(localStorage.getItem('nx_links')) || JSON.parse(JSON.stringify(DEFAULT_LINKS));
-    categories = JSON.parse(localStorage.getItem('nx_cats')) || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
-    totalClicks = parseInt(localStorage.getItem('nx_clicks')) || 0;
-    adminPassword = localStorage.getItem('nx_pass') || 'nexus123';
+    links = JSON.parse(localStorage.getItem('bl_links')) || JSON.parse(JSON.stringify(DEFAULT_LINKS));
+    categories = JSON.parse(localStorage.getItem('bl_cats')) || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+    totalClicks = parseInt(localStorage.getItem('bl_clicks')) || 0;
+    adminPassword = localStorage.getItem('bl_pass') || 'bieldexx07';
 }
 function saveState() {
-    localStorage.setItem('nx_links', JSON.stringify(links));
-    localStorage.setItem('nx_cats', JSON.stringify(categories));
-    localStorage.setItem('nx_clicks', totalClicks);
-    localStorage.setItem('nx_pass', adminPassword);
+    localStorage.setItem('bl_links', JSON.stringify(links));
+    localStorage.setItem('bl_cats', JSON.stringify(categories));
+    localStorage.setItem('bl_clicks', totalClicks);
+    localStorage.setItem('bl_pass', adminPassword);
 }
 
 // ===== RENDER =====
@@ -1045,10 +1103,10 @@ document.getElementById('btnSavePass').addEventListener('click', () => {
 
 document.getElementById('btnResetData').addEventListener('click', () => {
     if (!confirm('Resetar TODOS os dados? Isso não pode ser desfeito.')) return;
-    localStorage.removeItem('nx_links');
-    localStorage.removeItem('nx_cats');
-    localStorage.removeItem('nx_clicks');
-    localStorage.removeItem('nx_pass');
+    localStorage.removeItem('bl_links');
+    localStorage.removeItem('bl_cats');
+    localStorage.removeItem('bl_clicks');
+    localStorage.removeItem('bl_pass');
     location.reload();
 });
 
@@ -1057,7 +1115,7 @@ document.getElementById('btnExport').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'nexus-library-backup.json';
+    a.download = 'biel-links-backup.json';
     a.click();
 });
 
@@ -1099,38 +1157,51 @@ class Particle {
     constructor() { this.reset(); this.y = Math.random() * canvas.height; }
     reset() {
         this.x = Math.random() * canvas.width;
-        this.y = -10 - Math.random() * 80;
-        this.size = 1.5 + Math.random() * 3.5;
-        this.speedY = 0.25 + Math.random() * 0.6;
-        this.speedX = (Math.random() - 0.5) * 0.2;
-        this.opacity = 0.12 + Math.random() * 0.3;
+        this.y = -10 - Math.random() * 100;
+        this.size = 2 + Math.random() * 5;
+        this.speedY = 0.2 + Math.random() * 0.5;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.opacity = 0.15 + Math.random() * 0.4;
         this.hueOff = Math.random() * 360;
         this.wobble = Math.random() * Math.PI * 2;
-        this.wobbleSpd = 0.008 + Math.random() * 0.015;
+        this.wobbleSpd = 0.006 + Math.random() * 0.012;
+        this.glowSize = 3 + Math.random() * 3;
     }
     update() {
         this.y += this.speedY;
         this.wobble += this.wobbleSpd;
-        this.x += this.speedX + Math.sin(this.wobble) * 0.25;
+        this.x += this.speedX + Math.sin(this.wobble) * 0.3;
         const dx = mouseX - this.x, dy = mouseY - this.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 120) { this.x += dx * 0.0008; this.y += dy * 0.0008; }
+        if (dist < 150) { this.x += dx * 0.001; this.y += dy * 0.001; }
         if (this.y > canvas.height + 10) this.reset();
     }
     draw() {
         const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hue')) + this.hueOff;
+        // Outer glow
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * this.glowSize, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${h}, 80%, 65%, ${this.opacity * 0.08})`;
+        ctx.fill();
+        // Mid glow
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${h}, 80%, 65%, ${this.opacity * 0.18})`;
+        ctx.fill();
+        // Core
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${h}, 80%, 65%, ${this.opacity})`;
+        ctx.fillStyle = `hsla(${h}, 85%, 70%, ${this.opacity})`;
         ctx.fill();
+        // Bright center
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${h}, 80%, 65%, ${this.opacity * 0.12})`;
+        ctx.arc(this.x, this.y, this.size * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${h}, 90%, 85%, ${this.opacity * 0.6})`;
         ctx.fill();
     }
 }
 
-for (let i = 0; i < 55; i++) particlesArr.push(new Particle());
+for (let i = 0; i < 100; i++) particlesArr.push(new Particle());
 
 function animateParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1142,7 +1213,7 @@ animateParticles();
 // ===== RGB CYCLING =====
 let hue = 0;
 function cycleRGB() {
-    hue = (hue + 0.25) % 360;
+    hue = (hue + 0.35) % 360;
     document.documentElement.style.setProperty('--hue', hue);
     requestAnimationFrame(cycleRGB);
 }
